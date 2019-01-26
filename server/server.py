@@ -22,7 +22,7 @@ def send_file(path):
 def respond_to_ajax():
     r = Redis(host='localhost', port=6379, db=0)
     return jsonify({
-        'response': str(r.get('key123'), 'utf-8'),
+        'response': str(r.get('key123') or b'Nothing', 'utf-8'),
     })
 
 def run_server():
