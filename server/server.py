@@ -5,6 +5,8 @@ from flask import request
 from flask import render_template
 from flask import send_from_directory
 from flask import jsonify
+from redis import Redis
+
 
 app = Flask(__name__)
 
@@ -18,8 +20,9 @@ def send_file(path):
 
 @app.route('/ajax', methods=['POST'])
 def respond_to_ajax():
+    r = Redis(host='localhost', port=6379, db=0)
     return jsonify({
-        'response': int(request.form['smth']) + 1,
+        'response': str(r.get('key123'), 'utf-8'),
     })
 
 def run_server():
