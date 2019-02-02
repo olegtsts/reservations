@@ -40,15 +40,15 @@ message ReservationRequest {
     optional int64 time_to = 4;
 }
 
-enum ResponceStatus {
+enum ResponseStatus {
     UNDEFINED = 0;
     SUCCESS = 1;
-    FAILED = 2;
+    ALREADY_RESERVED = 2;
 }
 
 
-message ReservationResponce {
-    optional ResponceStatus status = 1;
-    optional string debug_message = 2;
+message ReservationResponse {
+    optional ResponseStatus status = 1;
+    optional string error_reason = 2;
     optional string secret_code = 3;
 }
