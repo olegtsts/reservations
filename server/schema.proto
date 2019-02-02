@@ -34,20 +34,21 @@ message Organisation {
 }
 
 message ReservationRequest {
-  optional string organisation_id = 1;
-  optional string reservlet_id = 2;
-  optional int64 time_from = 3;
-  optional int64 time_to = 4;
+    optional string organisation_id = 1;
+    optional string reservlet_id = 2;
+    optional int64 time_from = 3;
+    optional int64 time_to = 4;
 }
 
 enum ResponceStatus {
-    SUCCESS = 0;
-    FAILED = 1;
-  }
+    UNDEFINED = 0;
+    SUCCESS = 1;
+    FAILED = 2;
+}
 
 
 message ReservationResponce {
-  optional ResponceStatus status = 1;
-  optional string debug_message = 2;
-  optional string secret_code = 3;
+    optional ResponceStatus status = 1;
+    optional string debug_message = 2;
+    optional string secret_code = 3;
 }
