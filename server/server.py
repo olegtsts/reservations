@@ -6,7 +6,8 @@ from flask import render_template
 from flask import send_from_directory
 from flask import jsonify
 from redis import Redis
-
+import schema_pb2
+import hashlib
 
 app = Flask(__name__)
 
@@ -18,12 +19,19 @@ def main_page():
 def send_file(path):
     return send_from_directory('files', path)
 
-@app.route('/ajax', methods=['POST'])
+@app.route('/get_all_reservations', methods=['POST'])
 def respond_to_ajax():
-    r = Redis(host='localhost', port=6379, db=0)
     return jsonify({
-        'response': str(r.get('key123') or b'Nothing', 'utf-8'),
+        'data': get_all_reservations(request.form['restaurant_id'])
     })
+
+@app.route('/add_reservation', methods=['POST'])
+def respond_to_ajax():
+    return jsonify({
+        'responce': add_reservation(request.form['request_proto'])
+    })
+
+
 
 def run_server():
     app.run(

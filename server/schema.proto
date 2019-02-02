@@ -1,0 +1,53 @@
+syntax = "proto2";
+
+message Organisation {
+//  optional string id = 1;
+//  optional string name = 2;
+
+    message Reservlet {
+        optional string id = 1;
+        optional string name = 2;
+        optional string organisation_id = 3;
+    }
+
+    message Reservation {
+        optional string id = 1;
+        optional string reservlet_id = 2;
+        optional int64 time_from = 3;
+        optional int64 time_to = 4;
+    }
+
+    message ReservationSecret {
+        optional string reservation_id = 1;
+        optional string secret_code = 2;
+
+        message PersonalData {
+            optional string name = 1;
+        }
+
+        optional PersonalData data = 3;
+    }
+
+    repeated Reservlet reservlet = 1;
+    repeated Reservation reservation = 2;
+    repeated ReservationSecret reservation_secret = 3;
+}
+
+message ReservationRequest {
+  optional string organisation_id = 1;
+  optional string reservlet_id = 2;
+  optional int64 time_from = 3;
+  optional int64 time_to = 4;
+}
+
+enum ResponceStatus {
+    SUCCESS = 0;
+    FAILED = 1;
+  }
+
+
+message ReservationResponce {
+  optional ResponceStatus status = 1;
+  optional string debug_message = 2;
+  optional string secret_code = 3;
+}
