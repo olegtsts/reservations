@@ -40,14 +40,13 @@ message ReservationRequest {
     optional int64 time_to = 4;
 }
 
-enum ResponseStatus {
-    UNDEFINED = 0;
-    SUCCESS = 1;
-    ALREADY_RESERVED = 2;
-}
-
-
 message ReservationResponse {
+    enum ResponseStatus {
+        UNDEFINED = 0;
+        SUCCESS = 1;
+        ALREADY_RESERVED = 2;
+    }
+
     optional ResponseStatus status = 1;
     optional string error_reason = 2;
     optional string secret_code = 3;
