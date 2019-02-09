@@ -1,4 +1,8 @@
 $(function () {
+    goog.require('proto.Organization');
+    var message = new proto.Organization.Reservlet();
+    message.setName('123');
+    console.log(message.toObject());
     new State({
         ...new Menu({
             'id': 'test',

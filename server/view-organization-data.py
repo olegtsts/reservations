@@ -11,7 +11,7 @@ def get_organization_data(organization_id):
     if org_data is None:
         print("No such org found")
     else:
-        org = schema_pb2.Organisation()
+        org = schema_pb2.Organization()
         org.ParseFromString(org_data)
         print(org)
 

@@ -1,6 +1,6 @@
 syntax = "proto2";
 
-message Organisation {
+message Organization {
 //  optional string id = 1;
 //  optional string name = 2;
 
@@ -33,7 +33,7 @@ message Organisation {
 }
 
 message ReservationRequest {
-    optional string organisation_id = 1;
+    optional string organization_id = 1;
     optional string reservlet_id = 2;
     optional int64 time_from = 3;
     optional int64 time_to = 4;

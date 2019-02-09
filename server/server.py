@@ -23,8 +23,8 @@ def send_file(path):
 def get_all_reservations():
     r = Redis(host='localhost', port=6379, db=0)
 
-    org = schema_pb2.Organisation()
-    org.ParseFromString(r.get(request.form['organisation_id']))
+    org = schema_pb2.Organization()
+    org.ParseFromString(r.get(request.form['organization_id']))
 
     org.reservation_secret.Clear()
 
@@ -37,8 +37,8 @@ def add_reservation():
     r = Redis(host='localhost', port=6379, db=0)
     reservation_request = schema_pb2.ReservationRequest.ParseFromString(request.form['data'])
 
-    org = schema_pb2.Organisation()
-    org.ParseFromString(r.get(reservation_request.organisation_id))
+    org = schema_pb2.Organization()
+    org.ParseFromString(r.get(reservation_request.organization_id))
 
     response = schema_pb2.ReservationResponse()
 
@@ -63,7 +63,7 @@ def add_reservation():
     new_secret_code.secret_code = hashlib.blake2b(digest_size=5).update(str(datetime.datetime.now().time()) + reservation_request.reservlet_id)
     new_secret_code.reservation_id = new_reservation.id
 
-    r.set(reservation_request.organisation_id, org.SerializeToString())
+    r.set(reservation_request.organization_id, org.SerializeToString())
 
     response.status = schema_pb2.ReservationResponse.SUCCESS
     response.secret_code = new_secret_code.secret_code
