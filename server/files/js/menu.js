@@ -1,5 +1,5 @@
 function get_menu_buttons_html(params) {
-    var buttons_html = '<div class="col-6 offset-3" style="margin-top:50%">';
+    var buttons_html = '<div class="col-6 offset-3 col-lg-2 offset-lg-5" style="margin-top:15%">';
     for (var i = 0; i < params.options.length; ++i) {
         var option = params.options[i];
         buttons_html += '<div><button type="button" class="btn btn-primary btn-block btn-lg" name="' + option.id + '" id="' + params.id + '_' + option.id + '">' + option.name + '</button> </div><br>';

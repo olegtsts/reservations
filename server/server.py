@@ -78,7 +78,7 @@ def run_server():
         port=5001,
         use_reloader=False,
         debug=True,
-        threaded=False)
+        threaded=True)
 
 if __name__ == "__main__":
     run_server()
