@@ -236,24 +236,14 @@ function SendQuery(params) {
 SendQuery.prototype.on_enter = function(context) {
     var _this = this;
     var data = this.params.ajax_data(context);
-    data['client'] = 'browser';
-    data = JSON.stringify(data);
     $.ajax({
-        method: "GET",
-        url: "http://192.168.56.10/query",
+        method: "POST",
+        url: this.params.url,
         cache: false,
-        data: {
-            "json" : data,
-        },
+        data: data,
         success: function(response) {
-            if (response.status) {
-                context[_this.params.write_to || 'response'] = response.table;
-                State.go_to(context, _this.params)
-            } else {
-                alert(response.error);
-                throw new Error(response.error);
-            }
-
+            context[_this.params.write_to || 'response'] = response;
+            State.go_to(context, _this.params);
         },
         error: function (undefined, undefined, error) {
             alert(error);

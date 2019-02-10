@@ -1,9 +1,12 @@
 $(function () {
     goog.require('proto.Organization');
-    var message = new proto.Organization.Reservlet();
-    message.setName('123');
-    console.log(message.toObject());
     new State({
+        ...new Reservations({
+            'id': 'reservartions',
+            'initial_state': 'start',
+            'organization_id': 'test_org',
+        }).get_states(),
+        /*
         ...new Menu({
             'id': 'test',
             'container': function () {
@@ -32,5 +35,6 @@ $(function () {
                 'new_state': 'start',
             }),
         ]),
+        */
     });
 });

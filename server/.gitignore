@@ -4,3 +4,4 @@ files/closure-library/
 files/js/proto/
 files/protobuf/
 schema_pb2.py
+files/js/proto.js

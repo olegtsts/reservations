@@ -26,11 +26,9 @@ def get_all_reservations():
     org = schema_pb2.Organization()
     org.ParseFromString(r.get(request.form['organization_id']))
 
-    org.reservation_secret.Clear()
+    org.ClearField('reservation_secret')
 
-    return jsonify({
-        'data': org.SerializeToString()
-    })
+    return org.SerializeToString();
 
 @app.route('/add_reservation', methods=['POST'])
 def add_reservation():
