@@ -7,8 +7,10 @@ Menu.prototype.get_menu_buttons_html = function(context) {
     var options = call_or_get(this.params.options, context);
     for (var i = 0; i < options.length; ++i) {
         var option = options[i];
-        buttons_html += '<div><button type="button" class="btn btn-primary btn-block btn-lg options_' + this.params.id + '" name="' +
-            option.id + '" id="' + this.params.id + '_' + option.id + '">' + option.name + '</button> </div><br>';
+        var button_color_class = option.disabled ? 'btn-secondary' : 'btn-primary';
+        var disabled_string = option.disabled ? 'disabled' : '';
+        buttons_html += '<div><button type="button" class="btn ' + button_color_class + ' btn-block btn-lg options_' + this.params.id + '" name="' +
+            option.id + '" id="' + this.params.id + '_' + option.id + '"' + disabled_string + '>' + option.name + '</button> </div><br>';
     }
     buttons_html += '</div>'
     return buttons_html;
