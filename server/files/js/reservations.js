@@ -4,6 +4,12 @@ function Reservations(params) {
           "Jan", "Feb", "Mar", "Apr", "May", "Jun",
           "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
     ];
+    this.daypart_names = [
+        "Night",
+        "Morning",
+        "Afternoon",
+        "Evening",
+    ];
 }
 
 Reservations.prototype.get_reservations_loader = function() {
@@ -32,7 +38,7 @@ Reservations.prototype.setup_reservations = function(organization) {
     for (var i = 0; i < reservlets.length; ++i) {
         this.reservlet_time[reservlets[i].getId()] = {};
     }
-    var now = this.truncate_time(new Date().getTime() / 1000);
+    var now = this.truncate_time(new Date().getTime() / 1000 + 3600);
     var now_after_week = now + 3600 * 24 * 7;
     this.time_reservlet = {};
     for (var current_time = now; current_time < now_after_week; current_time += 3600) {
@@ -106,14 +112,78 @@ Reservations.prototype.get_day_menu_builder = function() {
     ]);
 }
 
+Reservations.prototype.get_daypart = function(time) {
+    var day_start = this.truncate_to_day(time);
+    return Math.min(Math.max(Math.floor((time - day_start) / 3600 / 6), 0), 3);
+}
+
+Reservations.prototype.get_hour_minutes_string = function(time) {
+    var date = new Date(time * 1000);
+    return date.getHours() + '.' + (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
+}
+
+Reservations.prototype.get_available_hours_string = function(hourly_timestamps) {
+    var _this = this;
+    var segments = [];
+    for (var i = 0; i < hourly_timestamps.length; ++i) {
+        var timestamp = parseInt(hourly_timestamps[i]);
+        if (segments.length > 0 && segments[segments.length - 1][1] + 3600 == timestamp) {
+            segments[segments.length - 1][1] = timestamp;
+        } else {
+            segments.push([timestamp, timestamp]);
+        }
+    }
+    return segments.map(function(segment) {
+        return _this.get_hour_minutes_string(segment[0]) + ' - ' + _this.get_hour_minutes_string(segment[1] + 3600 - 1);
+    }).join(', ');
+}
+
 Reservations.prototype.get_daypart_menu_builder = function() {
+    var _this = this;
     return new Combine([
         new Executer(function (context) {
-            alert(context.day_choice);
+            var reservlets_count = Object.keys(_this.reservlet_time).length;
+            var time_options = [];
+            for  (var current_time = parseInt(context.day_choice);
+                  _this.truncate_to_day(current_time) <= _this.truncate_to_day(parseInt(context.day_choice));
+                  current_time += 3600) {
+                if (_this.time_reservlet[current_time] !== undefined &&
+                    Object.keys(_this.time_reservlet[current_time]).length < reservlets_count) {
+                    time_options.push(current_time);
+                }
+            }
+            var dayparts_available_times = {};
+            for (var i = 0; i < 4; ++i) {
+                dayparts_available_times[i] = [];
+            }
+            for (var i = 0; i < time_options[i]; ++i) {
+                var time_option = time_options[i];
+                dayparts_available_times[_this.get_daypart(time_option)].push(time_option);
+            }
+            _this.daypart_options = [];
+            for (var i = 0; i < 4; ++i) {
+                _this.daypart_options.push({
+                    'id': i,
+                    'name': _this.daypart_names[i] + ' ' + _this.get_available_hours_string(dayparts_available_times[i]),
+                    'disabled': dayparts_available_times[i].length == 0,
+                });
+            }
         }),
         new GoTo({
             'type': 'next',
-            'new_state': this.params.id + '::day_menu',
+            'new_state': this.params.id + '::daypart_menu',
+        })
+    ]);
+}
+
+Reservations.prototype.debug_outputter = function() {
+    return new Combine([
+        new Executer(function (context) {
+            alert(context.daypart_choice);
+        }),
+        new GoTo({
+            'type': 'next',
+            'new_state': this.params.id + '::daypart_menu',
         })
     ]);
 }
@@ -124,6 +194,7 @@ Reservations.prototype.get_states = function() {
     states[this.params.initial_state] = this.get_reservations_loader();
     states[this.params.id + '::build_day_menu'] = this.get_day_menu_builder();
     states[this.params.id + '::build_daypart_menu'] = this.get_daypart_menu_builder();
+    states[this.params.id + '::build_reservlet_menu'] = this.debug_outputter();
     return {
         ...states,
         ...new Menu({
@@ -134,6 +205,16 @@ Reservations.prototype.get_states = function() {
             'final_state': this.params.id + '::build_daypart_menu',
             'options': function (context) {
                 return _this.day_options;
+            },
+        }).get_states(),
+        ...new Menu({
+            'id': this.params.id + '_daypart_menu',
+            'container': this.params.container,
+            'write_to': 'daypart_choice',
+            'initial_state': this.params.id + '::daypart_menu',
+            'final_state': this.params.id + '::build_reservlet_menu',
+            'options': function (context) {
+                return _this.daypart_options;
             },
         }).get_states()
     };
