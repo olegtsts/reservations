@@ -135,7 +135,7 @@ Reservations.prototype.get_available_hours_string = function(hourly_timestamps) 
     }
     return segments.map(function(segment) {
         return _this.get_hour_minutes_string(segment[0]) + ' - ' + _this.get_hour_minutes_string(segment[1] + 3600 - 1);
-    }).join(', ');
+    }).join('<br>');
 }
 
 Reservations.prototype.get_daypart_menu_builder = function() {
@@ -167,8 +167,8 @@ Reservations.prototype.get_daypart_menu_builder = function() {
             for (var i = 0; i < 4; ++i) {
                 _this.daypart_options.push({
                     'id': i,
-                    'name': _this.daypart_names[i] + ', ' + _this.get_day_name(parseInt(context.day_choice)) +
-                        ' ' + _this.get_available_hours_string(dayparts_available_times[i]),
+                    'name': _this.daypart_names[i] + '<br><font size="2">' + _this.get_day_name(parseInt(context.day_choice)) +
+                        '</font><br><font size="1">' + _this.get_available_hours_string(dayparts_available_times[i]) + '</font>',
                     'disabled': dayparts_available_times[i].length == 0,
                 });
             }
