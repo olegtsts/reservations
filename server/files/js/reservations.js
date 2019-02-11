@@ -167,7 +167,8 @@ Reservations.prototype.get_daypart_menu_builder = function() {
             for (var i = 0; i < 4; ++i) {
                 _this.daypart_options.push({
                     'id': i,
-                    'name': _this.daypart_names[i] + ' ' + _this.get_available_hours_string(dayparts_available_times[i]),
+                    'name': _this.daypart_names[i] + ', ' + _this.get_day_name(parseInt(context.day_choice)) +
+                        ' ' + _this.get_available_hours_string(dayparts_available_times[i]),
                     'disabled': dayparts_available_times[i].length == 0,
                 });
             }
