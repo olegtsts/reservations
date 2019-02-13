@@ -35,8 +35,10 @@ Reservations.prototype.setup_reservations = function(organization) {
     var reservlets = organization.getReservletList()
     var reservations = organization.getReservationList()
     this.reservlet_time = {};
+    this.reservlet_name = {};
     for (var i = 0; i < reservlets.length; ++i) {
         this.reservlet_time[reservlets[i].getId()] = {};
+        this.reservlet_name[reservlets[i].getId()] = reservlets[i].getName();
     }
     var now = this.truncate_time(new Date().getTime() / 1000 + 3600);
     var now_after_week = now + 3600 * 24 * 7;
@@ -180,12 +182,45 @@ Reservations.prototype.get_daypart_menu_builder = function() {
     ]);
 }
 
-Reservations.prototype.debug_outputter = function() {
+Reservations.prototype.get_reservlet_menu_builder = function() {
     var _this = this;
     return new Combine([
         new Executer(function (context) {
             if (context.daypart_choice != 'back') {
-                alert(context.daypart_choice);
+                var day = parseInt(context.day_choice)
+                var daypart = parseInt(context.daypart_choice);
+                var time_options = [];
+                for  (var current_time = day;
+                      _this.truncate_to_day(current_time) == day;
+                      current_time += 3600) {
+                    if (_this.get_daypart(current_time) == daypart) {
+                        time_options.push(current_time);
+                    }
+                }
+                var reservlets = Object.keys(_this.reservlet_time);
+                _this.reservlet_options = [{
+                    'id': 'back',
+                    'name': 'Back'
+                }];
+                for (var i = 0; i < reservlets.length; ++i) {
+                    var reservlet = reservlets[i];
+                    var available_times = [];
+                    for (var j = 0; j < time_options.length; ++j) {
+                        var current_time = time_options[j];
+                        if (_this.reservlet_time[reservlet][current_time] === undefined) {
+                            available_times.push(current_time);
+                        }
+                    }
+                    _this.reservlet_options.push({
+                        'id': reservlet,
+                        'name': _this.reservlet_name[reservlet] +
+                            '<br><font size="2">' + _this.get_day_name(day) +
+                            '<br><font size="1">' +
+                            _this.get_available_hours_string(available_times) +
+                            '</font>',
+                        'disabled': available_times.length == 0,
+                    });
+                }
             }
         }),
         new GoTo({
@@ -194,7 +229,28 @@ Reservations.prototype.debug_outputter = function() {
                 if (context.daypart_choice == 'back') {
                     return _this.params.id + '::day_menu';
                 } else {
+                    return _this.params.id + '::reservlet_menu';
+                }
+            }
+        })
+    ]);
+}
+
+Reservations.prototype.debug_outputter = function() {
+    var _this = this;
+    return new Combine([
+        new Executer(function (context) {
+            if (context.reservlet_choice != 'back') {
+                alert(context.reservlet_choice);
+            }
+        }),
+        new GoTo({
+            'type': 'next',
+            'new_state': function(context) {
+                if (context.reservlet_choice == 'back') {
                     return _this.params.id + '::daypart_menu';
+                } else {
+                    return _this.params.id + '::reservlet_menu';
                 }
             }
         })
@@ -207,7 +263,8 @@ Reservations.prototype.get_states = function() {
     states[this.params.initial_state] = this.get_reservations_loader();
     states[this.params.id + '::build_day_menu'] = this.get_day_menu_builder();
     states[this.params.id + '::build_daypart_menu'] = this.get_daypart_menu_builder();
-    states[this.params.id + '::build_reservlet_menu'] = this.debug_outputter();
+    states[this.params.id + '::build_reservlet_menu'] = this.get_reservlet_menu_builder();
+    states[this.params.id + '::build_starttime_menu'] = this.debug_outputter();
     return {
         ...states,
         ...new Menu({
@@ -228,6 +285,16 @@ Reservations.prototype.get_states = function() {
             'final_state': this.params.id + '::build_reservlet_menu',
             'options': function (context) {
                 return _this.daypart_options;
+            },
+        }).get_states(),
+        ...new Menu({
+            'id': this.params.id + '_reservlet_menu',
+            'container': this.params.container,
+            'write_to': 'reservlet_choice',
+            'initial_state': this.params.id + '::reservlet_menu',
+            'final_state': this.params.id + '::build_starttime_menu',
+            'options': function (context) {
+                return _this.reservlet_options;
             },
         }).get_states()
     };

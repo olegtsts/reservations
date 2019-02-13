@@ -29,6 +29,9 @@ Menu.prototype.get_menu_builder = function() {
                 `);
             },
         }),
+        new Executer(function (context) {
+            $(window).scrollTop(0);
+        }),
         new GoTo({
             'new_state': this.params.id + '::listen',
             'type': 'substate',
