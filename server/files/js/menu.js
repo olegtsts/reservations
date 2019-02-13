@@ -7,9 +7,9 @@ Menu.prototype.get_menu_buttons_html = function(context) {
     var options = call_or_get(this.params.options, context);
     for (var i = 0; i < options.length; ++i) {
         var option = options[i];
-        var button_color_class = option.disabled ? 'btn-secondary' : 'btn-primary';
+        var button_color_class = option.disabled ? 'btn-secondary' : 'btn-default';
         var disabled_string = option.disabled ? 'disabled' : '';
-        buttons_html += '<div><button type="button" class="btn ' + button_color_class + ' btn-block btn-lg options_' + this.params.id + '" name="' +
+        buttons_html += '<div><button style="border: 5px solid; border-color:#AAAAAA;" type="button" class="btn badge-pill ' + button_color_class + ' btn-block btn-lg options_' + this.params.id + '" name="' +
             option.id + '" id="' + this.params.id + '_' + option.id + '"' + disabled_string + '>' + option.name + '</button> </div><br>';
     }
     buttons_html += '</div>'

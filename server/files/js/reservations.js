@@ -4,6 +4,15 @@ function Reservations(params) {
           "Jan", "Feb", "Mar", "Apr", "May", "Jun",
           "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
     ];
+    this.weekday_names = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+    ];
     this.daypart_names = [
         "Night",
         "Morning",
@@ -69,7 +78,19 @@ Reservations.prototype.truncate_to_day = function(time) {
 
 Reservations.prototype.get_day_name = function(time) {
     date = new Date(time * 1000);
-    return date.getDate() + " " + this.month_names[date.getMonth()];
+    return date.getDate() + " " + this.month_names[date.getMonth()] + ", " + this.weekday_names[date.getDay()];
+}
+
+Reservations.prototype.get_large_day_name = function(time) {
+    date = new Date(time * 1000);
+    return date.getDate() + " " + this.month_names[date.getMonth()] + "<br>" + this.weekday_names[date.getDay()];
+}
+
+Reservations.prototype.wrapped_constant_height_text = function(text) {
+    return '<div style="height:80px ">' +
+        '<div style="margin: 0; position: relative; top: 50%; left: 50%; ' +
+        '-ms-transform: translate(-50%, -50%); transform: translate(-50%, -50%);">' + text + '</div></div>';
+
 }
 
 Reservations.prototype.setup_day_options = function() {
@@ -93,7 +114,7 @@ Reservations.prototype.setup_day_options = function() {
         var day_start_time = day_start_times[i];
         this.day_options.push({
             'id': day_start_time,
-            'name': this.get_day_name(day_start_time),
+            'name': this.wrapped_constant_height_text(this.get_large_day_name(day_start_time)),
             'disabled': !days_info[day_start_time]['is_day_free']
         });
     }
@@ -164,13 +185,14 @@ Reservations.prototype.get_daypart_menu_builder = function() {
             }
             _this.daypart_options = [{
                 'id': 'back',
-                'name': 'Back'
+                'name': _this.wrapped_constant_height_text('Back')
             }];
             for (var i = 0; i < 4; ++i) {
                 _this.daypart_options.push({
                     'id': i,
-                    'name': _this.daypart_names[i] + '<br><font size="2">' + _this.get_day_name(parseInt(context.day_choice)) +
-                        '</font><br><font size="1">' + _this.get_available_hours_string(dayparts_available_times[i]) + '</font>',
+                    'name': _this.wrapped_constant_height_text(
+                        _this.daypart_names[i] + '<br><font size="2">' + _this.get_day_name(parseInt(context.day_choice)) +
+                            '</font><br><font size="1">' + _this.get_available_hours_string(dayparts_available_times[i]) + '</font>'),
                     'disabled': dayparts_available_times[i].length == 0,
                 });
             }
@@ -200,7 +222,7 @@ Reservations.prototype.get_reservlet_menu_builder = function() {
                 var reservlets = Object.keys(_this.reservlet_time);
                 _this.reservlet_options = [{
                     'id': 'back',
-                    'name': 'Back'
+                    'name': _this.wrapped_constant_height_text('Back')
                 }];
                 for (var i = 0; i < reservlets.length; ++i) {
                     var reservlet = reservlets[i];
@@ -213,11 +235,11 @@ Reservations.prototype.get_reservlet_menu_builder = function() {
                     }
                     _this.reservlet_options.push({
                         'id': reservlet,
-                        'name': _this.reservlet_name[reservlet] +
+                        'name': _this.wrapped_constant_height_text(_this.reservlet_name[reservlet] +
                             '<br><font size="2">' + _this.get_day_name(day) +
                             '<br><font size="1">' +
                             _this.get_available_hours_string(available_times) +
-                            '</font>',
+                            '</font>'),
                         'disabled': available_times.length == 0,
                     });
                 }
