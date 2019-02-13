@@ -215,7 +215,7 @@ Reservations.prototype.get_reservlet_menu_builder = function() {
                 for  (var current_time = day;
                       _this.truncate_to_day(current_time) == day;
                       current_time += 3600) {
-                    if (_this.get_daypart(current_time) == daypart) {
+                    if (_this.get_daypart(current_time) == daypart && _this.time_reservlet[current_time] !== undefined) {
                         time_options.push(current_time);
                     }
                 }
