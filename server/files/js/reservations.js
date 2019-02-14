@@ -319,15 +319,12 @@ Reservations.prototype.get_stoptime_menu_builder = function() {
             if (context.starttime_choice != 'back') {
                 var reservlet = context.reservlet_choice;
                 var day = parseInt(context.day_choice)
-                var daypart = parseInt(context.daypart_choice);
                 var starttime = parseInt(context.starttime_choice);
                 var time_options = [];
                 for  (var current_time = starttime;
-                      _this.truncate_to_day(current_time) == day &&
                       current_time < starttime + 3 * 3600;
                       current_time += 3600) {
-                    if (_this.get_daypart(current_time) == daypart &&
-                        _this.time_reservlet[current_time] !== undefined) {
+                    if (_this.time_reservlet[current_time] !== undefined) {
                         time_options.push(current_time);
                     }
                 }
