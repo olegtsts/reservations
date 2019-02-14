@@ -312,21 +312,76 @@ Reservations.prototype.get_starttime_menu_builder = function() {
     ]);
 }
 
-Reservations.prototype.debug_outputter = function() {
+Reservations.prototype.get_stoptime_menu_builder = function() {
     var _this = this;
     return new Combine([
         new Executer(function (context) {
             if (context.starttime_choice != 'back') {
-                alert(context.starttime_choice);
+                var reservlet = context.reservlet_choice;
+                var day = parseInt(context.day_choice)
+                var daypart = parseInt(context.daypart_choice);
+                var starttime = parseInt(context.starttime_choice);
+                var time_options = [];
+                for  (var current_time = starttime;
+                      _this.truncate_to_day(current_time) == day &&
+                      current_time < starttime + 3 * 3600;
+                      current_time += 3600) {
+                    if (_this.get_daypart(current_time) == daypart &&
+                        _this.time_reservlet[current_time] !== undefined) {
+                        time_options.push(current_time);
+                    }
+                }
+                _this.stoptime_options = [{
+                    'id': 'back',
+                    'name':  _this.wrapped_constant_height_text('Back'),
+                }];
+                var is_available = true;
+                for (var i = 0; i < time_options.length; ++i) {
+                    var time_option = time_options[i];
+                    is_available = is_available && _this.time_reservlet[time_option][reservlet];
+                    _this.stoptime_options.push({
+                        'id': time_option + 3600 - 1,
+                        'name': _this.wrapped_constant_height_text(
+                            _this.get_hour_minutes_string(starttime) + '-' +
+                            _this.get_hour_minutes_string(time_option + 3600 - 1) +
+                            '<br><font size="2">' +
+                            _this.reservlet_name[reservlet] +
+                            '<br><font size="2">' + _this.get_day_name(day) +
+                            '</font>'
+                            ),
+                        'disabled': is_available,
+                    });
+                }
+            }
+        }),
+        new GoTo({
+            'type': 'next',
+            'new_state': function (context) {
+                if (context.starttime_choice == 'back') {
+                    return _this.params.id + '::reservlet_menu';
+                } else {
+                    return _this.params.id + '::stoptime_menu';
+                }
+            },
+        })
+    ]);
+}
+
+Reservations.prototype.debug_outputter = function() {
+    var _this = this;
+    return new Combine([
+        new Executer(function (context) {
+            if (context.stoptime_choice != 'back') {
+                alert(context.stoptime_choice);
             }
         }),
         new GoTo({
             'type': 'next',
             'new_state': function(context) {
-                if (context.starttime_choice == 'back') {
-                    return _this.params.id + '::reservlet_menu';
-                } else {
+                if (context.stoptime_choice == 'back') {
                     return _this.params.id + '::starttime_menu';
+                } else {
+                    return _this.params.id + '::stoptime_menu';
                 }
             }
         })
@@ -341,7 +396,8 @@ Reservations.prototype.get_states = function() {
     states[this.params.id + '::build_daypart_menu'] = this.get_daypart_menu_builder();
     states[this.params.id + '::build_reservlet_menu'] = this.get_reservlet_menu_builder();
     states[this.params.id + '::build_starttime_menu'] = this.get_starttime_menu_builder();
-    states[this.params.id + '::build_stoptime_menu'] = this.debug_outputter();
+    states[this.params.id + '::build_stoptime_menu'] = this.get_stoptime_menu_builder();
+    states[this.params.id + '::reserve'] = this.debug_outputter();
     return {
         ...states,
         ...new Menu({
@@ -382,6 +438,16 @@ Reservations.prototype.get_states = function() {
             'final_state': this.params.id + '::build_stoptime_menu',
             'options': function (context) {
                 return _this.starttime_options;
+            },
+        }).get_states(),
+        ...new Menu({
+            'id': this.params.id + '_stoptime_menu',
+            'container': this.params.container,
+            'write_to': 'stoptime_choice',
+            'initial_state': this.params.id + '::stoptime_menu',
+            'final_state': this.params.id + '::reserve',
+            'options': function (context) {
+                return _this.stoptime_options;
             },
         }).get_states()
     };
