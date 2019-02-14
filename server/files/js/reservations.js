@@ -156,6 +156,9 @@ Reservations.prototype.get_available_hours_string = function(hourly_timestamps) 
             segments.push([timestamp, timestamp]);
         }
     }
+    if (segments.length == 0) {
+        return "N / A";
+    }
     return segments.map(function(segment) {
         return _this.get_hour_minutes_string(segment[0]) + ' - ' + _this.get_hour_minutes_string(segment[1] + 3600 - 1);
     }).join('<br>');
@@ -258,21 +261,72 @@ Reservations.prototype.get_reservlet_menu_builder = function() {
     ]);
 }
 
-Reservations.prototype.debug_outputter = function() {
+
+Reservations.prototype.get_starttime_menu_builder = function() {
     var _this = this;
     return new Combine([
         new Executer(function (context) {
             if (context.reservlet_choice != 'back') {
-                alert(context.reservlet_choice);
+                var reservlet = context.reservlet_choice;
+                var day = parseInt(context.day_choice)
+                var daypart = parseInt(context.daypart_choice);
+                var time_options = [];
+                for  (var current_time = day;
+                      _this.truncate_to_day(current_time) == day;
+                      current_time += 3600) {
+                    if (_this.get_daypart(current_time) == daypart &&
+                        _this.time_reservlet[current_time] !== undefined) {
+                        time_options.push(current_time);
+                    }
+                }
+                _this.starttime_options = [{
+                    'id': 'back',
+                    'name':  _this.wrapped_constant_height_text('Back'),
+                }]
+                for (var i = 0; i < time_options.length; ++i) {
+                    var time_option = time_options[i];
+                    _this.starttime_options.push({
+                        'id': time_option,
+                        'name': _this.wrapped_constant_height_text(
+                            _this.get_hour_minutes_string(time_option) + ' - ...' +
+                            '<br><font size="2">' +
+                            _this.reservlet_name[reservlet] +
+                            '<br><font size="2">' + _this.get_day_name(day) +
+                            '</font>'
+                            ),
+                        'disabled': _this.time_reservlet[time_option][reservlet],
+                    });
+                }
+            }
+        }),
+        new GoTo({
+            'type': 'next',
+            'new_state': function (context) {
+                if (context.reservlet_choice == 'back') {
+                    return _this.params.id + '::daypart_menu';
+                } else {
+                    return _this.params.id + '::starttime_menu';
+                }
+            },
+        }),
+    ]);
+}
+
+Reservations.prototype.debug_outputter = function() {
+    var _this = this;
+    return new Combine([
+        new Executer(function (context) {
+            if (context.starttime_choice != 'back') {
+                alert(context.starttime_choice);
             }
         }),
         new GoTo({
             'type': 'next',
             'new_state': function(context) {
-                if (context.reservlet_choice == 'back') {
-                    return _this.params.id + '::daypart_menu';
-                } else {
+                if (context.starttime_choice == 'back') {
                     return _this.params.id + '::reservlet_menu';
+                } else {
+                    return _this.params.id + '::starttime_menu';
                 }
             }
         })
@@ -286,7 +340,8 @@ Reservations.prototype.get_states = function() {
     states[this.params.id + '::build_day_menu'] = this.get_day_menu_builder();
     states[this.params.id + '::build_daypart_menu'] = this.get_daypart_menu_builder();
     states[this.params.id + '::build_reservlet_menu'] = this.get_reservlet_menu_builder();
-    states[this.params.id + '::build_starttime_menu'] = this.debug_outputter();
+    states[this.params.id + '::build_starttime_menu'] = this.get_starttime_menu_builder();
+    states[this.params.id + '::build_stoptime_menu'] = this.debug_outputter();
     return {
         ...states,
         ...new Menu({
@@ -317,6 +372,16 @@ Reservations.prototype.get_states = function() {
             'final_state': this.params.id + '::build_starttime_menu',
             'options': function (context) {
                 return _this.reservlet_options;
+            },
+        }).get_states(),
+        ...new Menu({
+            'id': this.params.id + '_starttime_menu',
+            'container': this.params.container,
+            'write_to': 'starttime_choice',
+            'initial_state': this.params.id + '::starttime_menu',
+            'final_state': this.params.id + '::build_stoptime_menu',
+            'options': function (context) {
+                return _this.starttime_options;
             },
         }).get_states()
     };
